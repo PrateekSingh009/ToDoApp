@@ -1,7 +1,6 @@
 package com.example.todoapp.DB
 
 import android.content.Context
-import androidx.compose.runtime.Composable
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
@@ -15,22 +14,22 @@ abstract class TasksDatabase : RoomDatabase() {
 
     companion object {
 
+        private const val TASK_DATABASE = "Task_Database"
+
         @Volatile
-        private var INSTANCE: TasksDatabase? = null
+        private var databaseInstance: TasksDatabase? = null
 
         fun getDatabase(context: Context): TasksDatabase {
 
-            return INSTANCE ?: synchronized(this) {
+            return databaseInstance ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     TasksDatabase::class.java,
-                    "Task_Database"
+                    TASK_DATABASE
                 ).build()
-                INSTANCE = instance
+                databaseInstance = instance
                 instance
             }
-
-
         }
     }
 }

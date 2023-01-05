@@ -23,7 +23,7 @@ class MainActivity : AppCompatActivity() {
     }
     private val mainBinding: ActivityMainBinding by lazy { ActivityMainBinding.inflate(layoutInflater) }
     private val linearLayoutManager: LinearLayoutManager by lazy { LinearLayoutManager(this) }
-    private val taskRecyclerViewAdapter : TaskRecyclerViewAdapter by lazy{ TaskRecyclerViewAdapter(this, ::onNoteClick, ::onDeleteIconClick) }
+    private val taskRecyclerViewAdapter : TaskRecyclerViewAdapter by lazy{ TaskRecyclerViewAdapter(::onNoteClick, ::onDeleteIconClick) }
     lateinit var viewModel: TaskViewModel
 
 
@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setUpObservers(){
-        viewModel.colTask.observe(this) { list ->
+        viewModel.getAllTask().observe(this) { list ->
             list?.let {
                 taskRecyclerViewAdapter.updateList(it)
             }

@@ -1,6 +1,5 @@
 package com.example.todoapp
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -29,10 +28,15 @@ class InsertActivity : AppCompatActivity() {
             layoutInflater
         )
     }
-    lateinit var viewModel: TaskViewModel
+    private val viewModel: TaskViewModel by lazy {
+        ViewModelProvider(
+            this,
+            ViewModelProvider.AndroidViewModelFactory.getInstance(application)
+        )[TaskViewModel::class.java]
+    }
+
     private var taskID = -1
 
-    @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(insertActivityBinding.root)
@@ -62,10 +66,6 @@ class InsertActivity : AppCompatActivity() {
     }
 
     private fun setUpViews() {
-        viewModel = ViewModelProvider(
-            this,
-            ViewModelProvider.AndroidViewModelFactory.getInstance(application)
-        )[TaskViewModel::class.java]
         insertActivityBinding.let {
             intent.apply {
                 if (getStringExtra(TASK_TYPE).equals(EDIT)) {
@@ -78,5 +78,6 @@ class InsertActivity : AppCompatActivity() {
                 }
             }
         }
+        viewModel
     }
 }
