@@ -4,61 +4,77 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.example.todoapp.Adapter.TaskClickDeleteInterface
-import com.example.todoapp.Adapter.TaskClickInterface
 import com.example.todoapp.Adapter.TaskRecyclerViewAdapter
 import com.example.todoapp.Model.Task
 import com.example.todoapp.ViewModel.TaskViewModel
 import com.example.todoapp.databinding.ActivityMainBinding
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 
-class MainActivity : AppCompatActivity(), TaskClickInterface, TaskClickDeleteInterface {
+class MainActivity : AppCompatActivity() {
 
-    private lateinit var mainBinding: ActivityMainBinding
-    lateinit var viewModel : TaskViewModel
+    companion object {
+        const val TASK_TYPE = "TaskType"
+        const val TASK_TITLE= "TaskTitle"
+        const val TASK_DESCRIPTION = "TaskDescription"
+        const val TASK_ID = "TaskID"
+        const val EDIT = "Edit"
+
+    }
+    private val mainBinding: ActivityMainBinding by lazy { ActivityMainBinding.inflate(layoutInflater) }
+    private val linearLayoutManager: LinearLayoutManager by lazy { LinearLayoutManager(this) }
+    private val taskRecyclerViewAdapter : TaskRecyclerViewAdapter by lazy{ TaskRecyclerViewAdapter(this, ::onNoteClick, ::onDeleteIconClick) }
+    lateinit var viewModel: TaskViewModel
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mainBinding = ActivityMainBinding.inflate(layoutInflater)
-        val view = mainBinding.root
-        setContentView(view)
+        setContentView(mainBinding.root)
+        setUpViews()
+        setUpObservers()
+        setUpListeners()
+    }
 
-        mainBinding.recyclerView.layoutManager = LinearLayoutManager(this)
+    private fun setUpViews() {
+        mainBinding.recyclerView.apply {
+            layoutManager = linearLayoutManager
+            adapter = taskRecyclerViewAdapter
+        }
 
-        val taskRecyclerViewAdapter = TaskRecyclerViewAdapter(this,this,this)
-        mainBinding.recyclerView.adapter = taskRecyclerViewAdapter
-        viewModel = ViewModelProvider(this,ViewModelProvider.AndroidViewModelFactory.getInstance(application)).get(TaskViewModel::class.java)
-        viewModel.colTask.observe(this, Observer { list->
+        viewModel = ViewModelProvider(
+            this,
+            ViewModelProvider.AndroidViewModelFactory.getInstance(application)
+        ).get(TaskViewModel::class.java)
+    }
+
+    private fun setUpObservers(){
+        viewModel.colTask.observe(this) { list ->
             list?.let {
                 taskRecyclerViewAdapter.updateList(it)
             }
+        }
+    }
 
-        })
-
-        mainBinding.floatingActionButton.setOnClickListener{
-            val intent = Intent(this@MainActivity,InsertActivity::class.java)
-            startActivity(intent)
+    private fun setUpListeners(){
+        mainBinding.floatingActionButton.setOnClickListener {
+            startActivity(Intent(this@MainActivity, InsertActivity::class.java))
             this.finish()
         }
-
     }
 
-    override fun onNoteClick(task: Task) {
-        val intent = Intent(this@MainActivity,InsertActivity::class.java)
-        intent.putExtra("TaskType","Edit")
-        intent.putExtra("TaskTitle",task.title)
-        intent.putExtra("TaskDescription",task.description)
-        intent.putExtra("TaskID",task.id)
-        startActivity(intent)
+    private fun onNoteClick(task: Task) {
+        with (Intent(this@MainActivity, InsertActivity::class.java) ) {
+            putExtra(TASK_TYPE, EDIT)
+            putExtra(TASK_TITLE, task.title)
+            putExtra(TASK_DESCRIPTION, task.description)
+            putExtra(TASK_ID, task.id)
+            startActivity(this)
+        }
         this.finish()
-
     }
 
-    override fun onDeleteIconClick(task: Task) {
+    private fun onDeleteIconClick(task: Task) {
         viewModel.deleteTask(task)
-        Toast.makeText(this,"${task.title} Deleted", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "${task.title} Deleted", Toast.LENGTH_SHORT).show()
     }
 }

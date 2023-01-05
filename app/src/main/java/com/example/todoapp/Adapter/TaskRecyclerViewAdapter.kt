@@ -12,8 +12,8 @@ import com.example.todoapp.R
 
 class TaskRecyclerViewAdapter(
     val context: Context,
-    val taskClickInterface: TaskClickInterface,
-    val taskClickDeleteInterface: TaskClickDeleteInterface
+    val onNoteClick : ((task:Task) -> Unit),
+    val onDeleteIconClick : ((task:Task) -> Unit)
 ) : RecyclerView.Adapter<TaskRecyclerViewAdapter.ViewHolder>() {
 
     private val colTasks = ArrayList<Task>()
@@ -33,11 +33,11 @@ class TaskRecyclerViewAdapter(
         holder.taskDescription.text = colTasks.get(position).description
 
         holder.taskDeleteBtn.setOnClickListener{
-            taskClickDeleteInterface.onDeleteIconClick(colTasks.get(position))
+            onDeleteIconClick(colTasks.get(position))
         }
 
         holder.itemView.setOnClickListener{
-            taskClickInterface.onNoteClick((colTasks.get(position)))
+            onNoteClick((colTasks.get(position)))
         }
 
     }
@@ -51,10 +51,3 @@ class TaskRecyclerViewAdapter(
     }
 }
 
-interface TaskClickDeleteInterface {
-    fun onDeleteIconClick(task: Task)
-}
-
-interface TaskClickInterface {
-    fun onNoteClick(task: Task)
-}
